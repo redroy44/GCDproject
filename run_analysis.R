@@ -28,11 +28,13 @@ subject <- file.path(archiveName, "train", "subject_train.txt")
 X <- file.path(archiveName, "train", "X_train.txt")
 y <- file.path(archiveName, "train", "y_train.txt")
 
+# merge subject tables
 train <- read.table(subject)
 test <- read.table(gsub("train", "test", subject))
 subject_merged <- rbind(train, test)
 names(subject_merged) <- c("id")
 
+# merge labels
 train <- read.table(y)
 test <- read.table(gsub("train", "test", y))
 y_merged <- rbind(train, test)
@@ -40,10 +42,11 @@ names(y_merged) <- c("Activity")
 
 train <- read.table(X)
 test <- read.table(gsub("train", "test", X))
-merged <- rbind(train, test)
-names(merged) <- feat$V2
-merged <- merged[, l]
+X_merged <- rbind(train, test)
+names(X_merged) <- feat$V2
+
+merged <- X_merged[, l]
 merged <- cbind(y_merged, merged)
 merged <- cbind(subject_merged, merged)
-write.table(merged, file = "merged/X_merge.txt", row.name = FALSE)
+write.table(merged, file = "merged/dataset.txt", row.name = FALSE)
 
