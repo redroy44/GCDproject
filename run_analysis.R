@@ -1,9 +1,13 @@
 library(dplyr)
+library(tidyr)
 
 url <- "http://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip"
 
-#download.file(url, "dataset.zip")
-#unzip("dataset.zip")
+if (!file.exists("dataset.zip")) {
+  download.file(url, "dataset.zip")
+}
+unzip("dataset.zip")
+
 archiveName <- "./UCI HAR Dataset"
 
 trainFiles <- list.files(file.path(archiveName, "train"), recursive = FALSE, pattern = "*.txt")
@@ -27,10 +31,12 @@ y <- file.path(archiveName, "train", "y_train.txt")
 train <- read.table(subject)
 test <- read.table(gsub("train", "test", subject))
 subject_merged <- rbind(train, test)
+names(subject_merged) <- c("id")
 
 train <- read.table(y)
 test <- read.table(gsub("train", "test", y))
 y_merged <- rbind(train, test)
+names(y_merged) <- c("Activity")
 
 train <- read.table(X)
 test <- read.table(gsub("train", "test", X))
