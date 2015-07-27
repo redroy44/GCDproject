@@ -13,9 +13,12 @@ archiveName <- "./UCI HAR Dataset"
 trainFiles <- list.files(file.path(archiveName, "train"), recursive = FALSE, pattern = "*.txt")
 #testFiles <- list.files(file.path(archiveName, "test"), recursive = FALSE, pattern = "*.txt")
 
-# prepare output dir
-if (!file.exists("merged")) {
+# prepare output dirs
+if (!dir.exists("merged")) {
   dir.create("merged")
+}
+if (!dir.exists("tidy")) {
+  dir.create("tidy")
 } 
 
 #select mean and std features
@@ -47,3 +50,6 @@ merged <- cbind(y_merged, merged)
 merged <- cbind(subject_merged, merged)
 write.table(merged, file = "merged/X_merge.txt", row.name = FALSE)
 
+final <- tbl_df(merged) %>% group_by(id, Activity) %>% summarise_each(funs(mean))
+
+write.table(final, file = "tidy/dataset.txt", row.name = FALSE)
