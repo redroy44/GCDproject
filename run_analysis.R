@@ -25,6 +25,10 @@ if (!dir.exists("tidy")) {
 featFile <- file.path(archiveName, "features.txt")
 feat <- read.table(featFile)
 
+# read activity labels
+actFile <- file.path(archiveName, "activity_labels.txt")
+act <- read.table(actFile)
+
 l <- grep("mean|std", feat[,2], ignore.case = TRUE)
 
 subject <- file.path(archiveName, "train", "subject_train.txt")
@@ -34,22 +38,25 @@ y <- file.path(archiveName, "train", "y_train.txt")
 train <- read.table(subject)
 test <- read.table(gsub("train", "test", subject))
 subject_merged <- rbind(train, test)
-names(subject_merged) <- c("id")
+names(subject_merged) <- c("subject_id")
 
 train <- read.table(y)
 test <- read.table(gsub("train", "test", y))
 y_merged <- rbind(train, test)
-names(y_merged) <- c("Activity")
+y_act <- sapply(y_merged, function(i){ act[i, 2] })[, 1]
+y_merged <- cbind(y_merged, y_act)
+names(y_merged) <- c("Activity_ID", "Activity")
 
 train <- read.table(X)
 test <- read.table(gsub("train", "test", X))
 merged <- rbind(train, test)
 names(merged) <- feat$V2
+
 merged <- merged[, l]
 merged <- cbind(y_merged, merged)
 merged <- cbind(subject_merged, merged)
 write.table(merged, file = "merged/X_merge.txt", row.name = FALSE)
 
-final <- tbl_df(merged) %>% group_by(id, Activity) %>% summarise_each(funs(mean))
+final <- tbl_df(merged) %>% group_by(subject_id, Activity) %>% summarise_each(funs(mean))
 
 write.table(final, file = "tidy/dataset.txt", row.name = FALSE)
