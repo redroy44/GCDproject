@@ -29,7 +29,7 @@ feat <- read.table(featFile)
 actFile <- file.path(archiveName, "activity_labels.txt")
 act <- read.table(actFile)
 
-l <- grep("mean|std", feat[,2], ignore.case = TRUE)
+l <- grep("-mean|-std", feat[,2], ignore.case = TRUE)
 
 subject <- file.path(archiveName, "train", "subject_train.txt")
 X <- file.path(archiveName, "train", "X_train.txt")
@@ -58,5 +58,25 @@ merged <- cbind(subject_merged, merged)
 write.table(merged, file = "merged/X_merge.txt", row.name = FALSE)
 
 final <- tbl_df(merged) %>% group_by(subject_id, Activity) %>% summarise_each(funs(mean))
+
+# series of column names transformation to make them more "descriptive"
+pre <- names(final)
+post <- gsub("Acc", ".Acceleration.", pre)
+post <- gsub("Gyro", ".Gyroscope.", post)
+post <- gsub("()", "", post, fixed=TRUE)
+post <- gsub("-mean", ".mean", post, fixed=TRUE)
+post <- gsub("-std", ".std", post, fixed=TRUE)
+post <- gsub("Mag", "Magnitude", post, fixed=TRUE)
+post <- gsub("Jerk", "Jerk.", post, fixed=TRUE)
+post <- gsub("tB", "time.B", post, fixed=TRUE)
+post <- gsub("fB", "frequency.B", post, fixed=TRUE)
+post <- gsub("tG", "time.G", post, fixed=TRUE)
+post <- gsub("fG", "frequency.G", post, fixed=TRUE)
+post <- gsub("..", ".", post, fixed=TRUE)
+post <- gsub("-X", ".X.axis", post, fixed=TRUE)
+post <- gsub("-Y", ".Y.axis", post, fixed=TRUE)
+post <- gsub("-Z", ".Z.axis", post, fixed=TRUE)
+
+names(final) <- post
 
 write.table(final, file = "tidy/dataset.txt", row.name = FALSE)
